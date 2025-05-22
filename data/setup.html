@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Garden Monitor Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e7d32;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type=text], input[type=password], input[type=number] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        .section {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            color: #2e7d32;
+            margin-top: 30px;
+        }
+        /* Add this to your existing style section */
+.footer {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.footer a {
+    color: #2e7d32;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Garden Monitor Setup</h1>
+        <form id="setup-form">
+            <div class="section">
+                <h2 class="section-title">Device Settings</h2>
+                <div class="form-group">
+                    <label for="deviceName">Device Name:</label>
+                    <input type="text" id="deviceName" name="deviceName" value="Garden Monitor">
+                </div>
+                <div class="form-group">
+                    <label for="username">Web Interface Username:</label>
+                    <input type="text" id="username" name="username" value="user">
+                </div>
+                <div class="form-group">
+                    <label for="password">Web Interface Password:</label>
+                    <input type="password" id="password" name="password" value="pass">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Time and Date</h2>
+                <div class="form-group">
+                    <label for="date">Date (YYYY-MM-DD):</label>
+                    <input type="text" id="date" name="date" value="">
+                </div>
+                <div class="form-group">
+                    <label for="time">Time (HH:MM:SS):</label>
+                    <input type="text" id="time" name="time" value="">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">GPIO Pin Assignments</h2>
+                <div class="form-group">
+                    <label for="soilMoisturePin">Soil Moisture Sensor Pin:</label>
+                    <input type="number" id="soilMoisturePin" name="soilMoisturePin" value="36">
+                </div>
+                <div class="form-group">
+                    <label for="soilMoisturePowerPin">Soil Moisture Power Pin:</label>
+                    <input type="number" id="soilMoisturePowerPin" name="soilMoisturePowerPin" value="32">
+                </div>
+                <div class="form-group">
+                    <label for="touchPin">Touch Switch Pin:</label>
+                    <input type="number" id="touchPin" name="touchPin" value="4">
+                </div>
+                <div class="form-group">
+                    <label for="i2cSdaPin">I2C SDA Pin:</label>
+                    <input type="number" id="i2cSdaPin" name="i2cSdaPin" value="21">
+                </div>
+                <div class="form-group">
+                    <label for="i2cSclPin">I2C SCL Pin:</label>
+                    <input type="number" id="i2cSclPin" name="i2cSclPin" value="22">
+                </div>
+                <div class="form-group">
+                    <label for="relay1Pin">Relay 1 Pin:</label>
+                    <input type="number" id="relay1Pin" name="relay1Pin" value="16">
+                </div>
+                <div class="form-group">
+                    <label for="relay2Pin">Relay 2 Pin:</label>
+                    <input type="number" id="relay2Pin" name="relay2Pin" value="17">
+                </div>
+                <div class="form-group">
+                    <label for="relay3Pin">Relay 3 Pin:</label>
+                    <input type="number" id="relay3Pin" name="relay3Pin" value="18">
+                </div>
+                <div class="form-group">
+                    <label for="relay4Pin">Relay 4 Pin:</label>
+                    <input type="number" id="relay4Pin" name="relay4Pin" value="19">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Relay Names</h2>
+                <div class="form-group">
+                    <label for="relay1Name">Relay 1 Name:</label>
+                    <input type="text" id="relay1Name" name="relay1Name" value="Aux">
+                </div>
+                <div class="form-group">
+                    <label for="relay2Name">Relay 2 Name:</label>
+                    <input type="text" id="relay2Name" name="relay2Name" value="Pump 1">
+                </div>
+                <div class="form-group">
+                    <label for="relay3Name">Relay 3 Name:</label>
+                    <input type="text" id="relay3Name" name="relay3Name" value="Pump 2">
+                </div>
+                <div class="form-group">
+                    <label for="relay4Name">Relay 4 Name:</label>
+                    <input type="text" id="relay4Name" name="relay4Name" value="Sensor">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Soil Moisture Calibration</h2>
+                <div class="form-group">
+                    <label for="soilMoistureDry">Dry Calibration Value:</label>
+                    <input type="number" id="soilMoistureDry" name="soilMoistureDry" value="2720">
+                </div>
+                <div class="form-group">
+                    <label for="soilMoistureWet">Wet Calibration Value:</label>
+                    <input type="number" id="soilMoistureWet" name="soilMoistureWet" value="845">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Watering Settings</h2>
+                <div class="form-group">
+                    <label for="wateringDuration">Watering Duration (seconds):</label>
+                    <input type="number" id="wateringDuration" name="wateringDuration" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="wateringTimeStart">Watering Start Time (hour, 0-23):</label>
+                    <input type="number" id="wateringTimeStart" name="wateringTimeStart" min="0" max="23" value="8">
+                </div>
+                <div class="form-group">
+                    <label for="wateringTimeEnd">Watering End Time (hour, 0-23):</label>
+                    <input type="number" id="wateringTimeEnd" name="wateringTimeEnd" min="0" max="23" value="20">
+                </div>
+                <div class="form-group">
+                    <label for="waterAtPercent">Water When Below (%):</label>
+                    <input type="number" id="waterAtPercent" name="waterAtPercent" min="0" max="100" value="30">
+                </div>
+            </div>
+
+            <button type="submit">Save Configuration</button>
+        </form>
+        <div class="footer">
+            <span>Created, designed and programmed by:</span><br />
+            <span>Jim <a href="https://M1Musik.com" target="_blank"> M1Musik.com</a></span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date and time as default
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById('date').value = `${year}-${month}-${day}`;
+            document.getElementById('time').value = `${hours}:${minutes}:${seconds}`;
+            
+            // Load existing config if available
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(config => {
+                    // Populate form fields with config values
+                    document.getElementById('deviceName').value = config.deviceName || 'GartenIrrigationSystem';
+                    document.getElementById('username').value = config.username || 'user';
+                    document.getElementById('password').value = config.password || 'pass';
+                    document.getElementById('soilMoisturePin').value = config.soilMoisturePin || 36;
+                    document.getElementById('soilMoisturePowerPin').value = config.soilMoisturePowerPin || 27;
+                    document.getElementById('touchPin').value = config.touchPin || 4;
+                    document.getElementById('i2cSdaPin').value = config.i2cSdaPin || 21;
+                    document.getElementById('i2cSclPin').value = config.i2cSclPin || 22;
+                    document.getElementById('relay1Pin').value = config.relay1Pin || 25;
+                    document.getElementById('relay2Pin').value = config.relay2Pin || 26;
+                    document.getElementById('relay3Pin').value = config.relay3Pin || 32;
+                    document.getElementById('relay4Pin').value = config.relay4Pin || 33;
+                    document.getElementById('relay1Name').value = config.relay1Name || 'Aux';
+                    document.getElementById('relay2Name').value = config.relay2Name || 'Pump 1';
+                    document.getElementById('relay3Name').value = config.relay3Name || 'Pump 2';
+                    document.getElementById('relay4Name').value = config.relay4Name || 'Sensor';
+                    document.getElementById('soilMoistureDry').value = config.soilMoistureDry || 2350;
+                    document.getElementById('soilMoistureWet').value = config.soilMoistureWet || 815;
+                    document.getElementById('wateringDuration').value = config.wateringDuration || 30;                    document.getElementById('wateringTimeStart').value = config.wateringTimeStart || 8;
+                    document.getElementById('wateringTimeEnd').value = config.wateringTimeEnd || 9;
+                    document.getElementById('waterAtPercent').value = config.waterAtPercent || 60;
+                })
+                .catch(error => console.error('Error loading config:', error));
+                
+            // Handle form submission
+            document.getElementById('setup-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Convert form data to JSON object
+                const formData = {
+                    deviceName: document.getElementById('deviceName').value,
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    soilMoisturePin: parseInt(document.getElementById('soilMoisturePin').value),
+                    soilMoisturePowerPin: parseInt(document.getElementById('soilMoisturePowerPin').value),
+                    touchPin: parseInt(document.getElementById('touchPin').value),
+                    i2cSdaPin: parseInt(document.getElementById('i2cSdaPin').value),
+                    i2cSclPin: parseInt(document.getElementById('i2cSclPin').value),
+                    relay1Pin: parseInt(document.getElementById('relay1Pin').value),
+                    relay2Pin: parseInt(document.getElementById('relay2Pin').value),
+                    relay3Pin: parseInt(document.getElementById('relay3Pin').value),
+                    relay4Pin: parseInt(document.getElementById('relay4Pin').value),
+                    relay1Name: document.getElementById('relay1Name').value,
+                    relay2Name: document.getElementById('relay2Name').value,
+                    relay3Name: document.getElementById('relay3Name').value,
+                    relay4Name: document.getElementById('relay4Name').value,
+                    soilMoistureDry: parseInt(document.getElementById('soilMoistureDry').value),
+                    soilMoistureWet: parseInt(document.getElementById('soilMoistureWet').value),
+                    wateringDuration: parseInt(document.getElementById('wateringDuration').value),                    wateringTimeStart: parseInt(document.getElementById('wateringTimeStart').value),
+                    wateringTimeEnd: parseInt(document.getElementById('wateringTimeEnd').value),
+                    waterAtPercent: parseInt(document.getElementById('waterAtPercent').value),
+                    date: document.getElementById('date').value,
+                    time: document.getElementById('time').value
+                };
+                
+                // Send configuration data to ESP32
+                fetch('/api/config', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    alert('Configuration saved successfully. Device will reboot.');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error saving config:', error);
+                    alert('Error saving configuration. Please try again.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

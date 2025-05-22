@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Garden Monitor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e7d32;
+            text-align: center;
+            margin-top: 0;
+        }
+        .card {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2e7d32;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+        .readings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .reading {
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items horizontally */
+            padding: 5px 0;
+            text-align: center;
+        }
+        .reading-label {
+            color: #666;
+        }
+        .reading-value {
+            font-weight: bold;
+        }
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        button.active {
+            background-color: #f44336;
+        }
+        button.active:hover {
+            background-color: #d32f2f;
+        }
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .action-buttons button {
+            background-color: #0277bd;
+        }
+        .action-buttons button:hover {
+            background-color: #01579b;
+        }
+        .action-buttons button.danger {
+            background-color: #f44336;
+        }
+        .action-buttons button.danger:hover {
+            background-color: #d32f2f;
+        }
+        .date-time {
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        #loading-icon, #button-spinner {
+            display: inline-block;
+            width: 1em; /* Set a fixed width */
+            height: 1em; /* Set a fixed height */
+            visibility: hidden; /* Use visibility instead of display:none */
+            animation: spin 1s linear infinite; /* Add rotation animation */
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Class to show the icon while preserving space */
+        .visible {
+            visibility: visible !important;
+        }
+        /* Add this to your existing style section */
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #2e7d32;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="device-name">Garden Monitor<span id="loading-icon">⟳</span></h1>
+        
+        <div class="date-time" id="datetime">Loading...</div>
+        
+        <div class="card">
+            <div class="card-title">Environmental Readings</div>
+            <div class="readings">
+                <div class="reading">
+                    <span class="reading-label">Temperature:</span>
+                    <span class="reading-value" id="temperature">--</span>
+                </div>
+                <div class="reading">
+                    <span class="reading-label">Humidity:</span>
+                    <span class="reading-value" id="humidity">--</span>
+                </div>
+                <div class="reading">
+                    <span class="reading-label">Pressure:</span>
+                    <span class="reading-value" id="pressure">--</span>
+                </div>
+                <div class="reading">
+                    <span class="reading-label">Heat Index:</span>
+                    <span class="reading-value" id="heat-index">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">Soil Moisture</div>
+            <div class="readings">
+                <div class="reading">
+                    <span class="reading-label">Raw Value:</span>
+                    <span class="reading-value" id="soil-raw">--</span>
+                </div>
+                <div class="reading">
+                    <span class="reading-label">Percentage:</span>
+                    <span class="reading-value" id="soil-percentage">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">Relay Controls</div>
+            <div class="button-row">
+                <button id="relay1" data-relay="0" data-name="">Loading...</button>
+                <button id="relay2" data-relay="1" data-name="">Loading...</button>
+            </div>
+            <div class="button-row">
+                <button id="relay3" data-relay="2" data-name="">Loading...</button>
+                <button id="relay4" data-relay="3" data-name="">Loading...</button>
+            </div>
+            <div id="watering-status" class="reading"></div>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="water-now">Water Now</button>
+            <button id="read-now" onclick="forceSensorReadNowDirect()">Read Now <span id="button-spinner">⟳</span></button>
+            <button id="reset" class="danger">Reset Device</button>
+        </div>
+        <div class="footer">
+            <span>Created, designed and programmed by:</span><br />
+            <span>Jim <a href="https://M1Musik.com" target="_blank"> M1Musik.com</a></span>
+        </div>
+    </div>
+
+    <script>
+        // Add custom names to relay buttons
+        function updateRelayNames(names) {
+            document.querySelectorAll('[data-relay]').forEach((button, index) => {
+                if (names && names[index]) {
+                    // Store the name in a data attribute for later use
+                    button.setAttribute('data-name', names[index]);
+                    const isActive = button.classList.contains('active');
+                    button.textContent = names[index] + (isActive ? ': On' : ': Off');
+                }
+            });
+        }
+            
+        // Update sensor data on the page
+        function updateSensorData(data) {
+            document.getElementById('temperature').textContent = data.temperature + ' \u00B0C';
+            document.getElementById('humidity').textContent = data.humidity + ' %';
+            document.getElementById('pressure').textContent = data.pressure + ' hPa';
+            document.getElementById('heat-index').textContent = data.heatIndex + ' \u00B0C';
+            document.getElementById('soil-raw').textContent = data.soilRaw;
+            document.getElementById('soil-percentage').textContent = data.soil_moisture ? data.soil_moisture.toFixed(1) + ' %' : '--';
+            document.getElementById('device-name').textContent = data.deviceName || 'Garden Monitor';
+            
+            // Update relay names if they're in the response
+            if (data.relay_names) {
+                updateRelayNames(data.relay_names);
+            }
+            
+            // Update relay status
+            updateRelayStatus(data.relays);
+        }
+            
+        // Update relay button appearance based on status
+        function updateRelayStatus(relayStatus) {
+            const buttons = document.querySelectorAll('[data-relay]');
+            buttons.forEach((button, index) => {
+                const name = button.getAttribute('data-name') || `Relay ${index+1}`;
+                
+                if (relayStatus[index]) {
+                    button.classList.add('active');
+                    button.textContent = name + ': On';
+                } else {
+                    button.classList.remove('active');
+                    button.textContent = name + ': Off';
+                }
+            });
+        }
+            
+        function toggleRelay(relay, state) {
+            // Make POST request with the correct relay and state values
+            fetch('/api/relay', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'id=' + relay + '&state=' + state  // FIXED: Changed 'relay=' to 'id='
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Relay control success:', data);
+                
+                // Update UI based on response
+                if (data.success) {
+                    const button = document.querySelector(`[data-relay="${relay}"]`);
+                    if (button) {
+                        // Try to get the name from the button, otherwise default to "Relay X"
+                        const name = button.getAttribute('data-name') || `Relay ${Number(relay) + 1}`;
+                        if (data.state === 1) {
+                            button.classList.add('active');
+                            button.textContent = name + ': On';
+                        } else {
+                            button.classList.remove('active');
+                            button.textContent = name + ': Off';
+                        }
+                    }
+                    
+                    // Refresh sensor data to update all relay states
+                    setTimeout(fetchSensorData, 10000); // 10 seconds instead of 5
+                }
+            })
+            .catch(error => {
+                console.error('Error controlling relay:', error);
+                // Refresh sensor data to get current states
+                setTimeout(fetchSensorData, 10000); // 10 seconds instead of 5
+            });
+        } 
+            
+        // Function to fetch sensor data from API
+        function fetchSensorData() {
+            console.log("Fetching sensor data...");
+            document.getElementById('loading-icon').classList.add('visible');
+            document.getElementById('button-spinner').classList.add('visible');
+
+            fetch('/api/sensor-data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Sensor data received:", data);
+                    
+                    try {
+                        // Update temperature with validation
+                        if (data.temperature !== undefined && data.temperature !== null) {
+                            document.getElementById('temperature').textContent = data.temperature.toFixed(1) + '°C';
+                        } else {
+                            document.getElementById('temperature').textContent = '--°C';
+                            console.warn("Temperature data missing or invalid");
+                        }
+                        
+                        // Update humidity with validation
+                        if (data.humidity !== undefined && data.humidity !== null) {
+                            document.getElementById('humidity').textContent = data.humidity.toFixed(1) + '%';
+                        } else {
+                            document.getElementById('humidity').textContent = '--%';
+                            console.warn("Humidity data missing or invalid");
+                        }
+                        
+                        // Update pressure with validation
+                        if (data.pressure !== undefined && data.pressure !== null) {
+                            document.getElementById('pressure').textContent = data.pressure.toFixed(1) + ' hPa';
+                        } else {
+                            document.getElementById('pressure').textContent = '-- hPa';
+                            console.warn("Pressure data missing or invalid");
+                        }
+                        
+                        // Update heat index with validation
+                        if (data.heat_index !== undefined && data.heat_index !== null) {
+                            document.getElementById('heat-index').textContent = data.heat_index.toFixed(1) + '°C';
+                        } else {
+                            document.getElementById('heat-index').textContent = '--°C';
+                            console.warn("Heat index data missing or invalid");
+                        }
+
+                        // Update soil moisture with validation
+                        if (data.soil_moisture !== undefined && data.soil_moisture !== null) {
+                            document.getElementById('soil-percentage').textContent = data.soil_moisture.toFixed(1) + '%';
+                        } else {
+                            document.getElementById('soil-percentage').textContent = '--%';
+                            console.warn("Soil moisture data missing or invalid");
+                        }
+                        
+                        // Update soil raw with validation
+                        if (data.soil_raw !== undefined && data.soil_raw !== null) {
+                            document.getElementById('soil-raw').textContent = data.soil_raw;
+                        } else {
+                            document.getElementById('soil-raw').textContent = '--';
+                            console.warn("Soil raw data missing or invalid");
+                        }
+                        
+                        // Update timestamp - use the time_str directly if available
+                        if (data.time_str) {
+                            document.getElementById('datetime').textContent = data.time_str;
+                        } else if (data.timestamp) {
+                            // Fallback to timestamp conversion if time_str not available
+                            const timestamp = data.timestamp * 1000;
+                            const date = new Date(timestamp);
+                            const dateString = date.toLocaleString();
+                            document.getElementById('datetime').textContent = dateString;
+                        } else {
+                            document.getElementById('datetime').textContent = 'Time unavailable';
+                            console.warn("Timestamp data missing or invalid");
+                        }
+
+                        // Update relay statuses with validation
+                        if (data.relays && Array.isArray(data.relays)) {
+                            for (let i = 0; i < data.relays.length; i++) {
+                                const button = document.querySelector(`[data-relay="${i}"]`);
+                                if (button) {
+                                    // Use relay_names if available
+                                    if (data.relay_names && data.relay_names[i]) {
+                                        button.setAttribute('data-name', data.relay_names[i]);
+                                        
+                                        if (data.relays[i]) {
+                                            button.classList.add('active');
+                                            button.textContent = data.relay_names[i] + ': On';
+                                        } else {
+                                            button.classList.remove('active');
+                                            button.textContent = data.relay_names[i] + ': Off';
+                                        }
+                                    } else {
+                                        // Fallback if relay names not available
+                                        if (data.relays[i]) {
+                                            button.classList.add('active');
+                                            button.textContent = 'Relay ' + (i+1) + ': On';
+                                        } else {
+                                            button.classList.remove('active');
+                                            button.textContent = 'Relay ' + (i+1) + ': Off';
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            console.warn("Relay data missing or invalid");
+                        }
+                        
+                        // Update watering status
+                        const waterNowButton = document.getElementById('water-now');
+                        const wateringStatus = document.getElementById('watering-status');
+
+                        if (data.watering_active) {
+                            waterNowButton.disabled = true;
+                            
+                            if (data.watering_remaining !== undefined && data.watering_remaining !== null) {
+                                wateringStatus.textContent = `Watering in progress: ${data.watering_remaining} seconds remaining`;
+                            } else {
+                                wateringStatus.textContent = 'Watering in progress';
+                            }
+                            wateringStatus.classList.add('active');
+                            
+                            // Start checking status frequently during watering
+                            if (!wateringStatusChecker) {
+                                console.log("Starting watering status checker");
+                                startWateringStatusCheck();
+                            }
+                        } else {
+                            waterNowButton.disabled = false;
+                            wateringStatus.textContent = 'Watering inactive';
+                            wateringStatus.classList.remove('active');
+                            
+                            // Stop checking status when watering is done
+                            if (wateringStatusChecker) {
+                                console.log("Stopping watering status checker");
+                                stopWateringStatusCheck();
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Error processing sensor data:", err);
+                    }
+                    
+                    // Hide loading icons
+                    document.getElementById('loading-icon').classList.remove('visible');
+                    document.getElementById('button-spinner').classList.remove('visible');
+                })
+                .catch(error => {
+                    console.error('Error fetching sensor data:', error);
+                    // Hide loading icons
+                    document.getElementById('loading-icon').classList.remove('visible');
+                    document.getElementById('button-spinner').classList.remove('visible');
+                });
+        }
+
+        let wateringStatusChecker = null;
+
+        function startWateringStatusCheck() {
+            // Check every 2 seconds during watering
+            wateringStatusChecker = setInterval(fetchSensorData, 2000);
+        }
+
+        function stopWateringStatusCheck() {
+            if (wateringStatusChecker) {
+                clearInterval(wateringStatusChecker);
+                wateringStatusChecker = null;
+            }
+        }
+
+        // Add event listeners when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial data fetch
+            fetchSensorData();
+            
+            // Add event listeners to relay buttons
+            document.querySelectorAll('[data-relay]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const relayNum = this.dataset.relay;
+                    const isCurrentlyActive = this.classList.contains('active');
+                    // If currently active, turn off (0), otherwise turn on (1)
+                    const newState = isCurrentlyActive ? 0 : 1;
+                    toggleRelay(relayNum, newState);
+                });
+            });
+            
+            // Use your existing "read-now" button instead of adding a new refresh button
+            //document.getElementById('read-now').addEventListener('click', fetchSensorData);
+            
+            // Add water now button listener
+            document.getElementById('water-now').addEventListener('click', function() {
+                // First check if watering is already in progress
+                const pumpButton = document.querySelector('[data-relay="1"]');
+                if (pumpButton && pumpButton.classList.contains('active')) {
+                    alert('Watering is already in progress!');
+                    return;
+                }
+                
+                if (confirm('Start watering now?')) {
+                    // Show some feedback that the request is being processed
+                    const wateringStatus = document.getElementById('watering-status');
+                    wateringStatus.textContent = 'Starting watering...';
+                    
+                    fetch('/api/water-now', { method: 'POST' })  // FIXED: Added method: 'POST'
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();  // FIXED: Changed to text instead of json
+                        })
+                        .then(text => {
+                            // FIXED: Handle text response instead of JSON
+                            console.log("Watering response:", text);
+                            
+                            // Update UI immediately without waiting for fetch
+                            const waterNowButton = document.getElementById('water-now');
+                            
+                            // Disable the button
+                            waterNowButton.disabled = true;
+                            
+                            // Update status text
+                            wateringStatus.textContent = `Watering in progress`;
+                            wateringStatus.classList.add('active');
+                            
+                            // Update the pump button (relay2 is pump1)
+                            if (pumpButton) {
+                                const name = pumpButton.getAttribute('data-name') || "Pump 1";
+                                pumpButton.classList.add('active');
+                                pumpButton.textContent = name + ': On';
+                            }
+                            
+                            // Start the watering status checker to keep UI updated
+                            if (!wateringStatusChecker) {
+                                console.log("Starting watering status checker");
+                                startWateringStatusCheck();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error starting watering:', error);
+                            alert('Failed to start watering. Check console for details.');
+                            // Reset status on error
+                            wateringStatus.textContent = 'Watering inactive';
+                        });
+                }
+            });
+            
+            // Use your existing "reset" button instead of adding a reset-btn
+            document.getElementById('reset').addEventListener('click', function() {
+                if (confirm('Reset device to setup mode? This will restart the device.')) {
+                    fetch('/api/reset', { method: 'POST' })  // FIXED: Added method: 'POST'
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Device is entering setup mode...');
+                                // Redirect to setup AP after a delay
+                                setTimeout(() => {
+                                    window.location.href = 'http://192.168.4.1';
+                                }, 5000);
+                            } else {
+                                alert('Failed to reset device');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error resetting device:', error);
+                        });
+                }
+            });
+            
+            // Add a periodic check for watering status
+            const autoRefreshInterval = 5000; // Check every 5 seconds
+            setInterval(() => {
+                fetch('/api/sensor-data')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Check if either watering_active is true OR the pump relay is ON
+                        if (data.watering_active || (data.relays && data.relays[1] === true)) {
+                            console.log("Detected active watering or pump during auto-refresh");
+                            
+                            const waterNowButton = document.getElementById('water-now');
+                            const wateringStatus = document.getElementById('watering-status');
+                            
+                            // Update the button state
+                            waterNowButton.disabled = true;
+                            
+                            // Update status text
+                            if (data.watering_remaining) {
+                                wateringStatus.textContent = `Watering in progress: ${data.watering_remaining} seconds remaining`;
+                            } else {
+                                wateringStatus.textContent = `Watering in progress`;
+                            }
+                            wateringStatus.classList.add('active');
+                            
+                            // Update the pump button
+                            const pumpButton = document.querySelector('[data-relay="1"]');
+                            if (pumpButton && !pumpButton.classList.contains('active')) {
+                                const name = pumpButton.getAttribute('data-name') || "Pump 1";
+                                pumpButton.classList.add('active');
+                                pumpButton.textContent = name + ': On';
+                            }
+                            
+                            // Start the watering status checker
+                            if (!wateringStatusChecker) {
+                                console.log("Starting watering status checker from auto-refresh");
+                                startWateringStatusCheck();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Auto-refresh error:", error);
+                    });
+            }, autoRefreshInterval);
+        });
+    </script>
+    <script>
+// Direct function to force sensor reading
+async function forceSensorReadNowDirect() {
+    console.log('Read Now button clicked directly!');
+    
+    // Disable button and show spinner
+    const readNowButton = document.getElementById('read-now');
+    const spinner = document.getElementById('button-spinner');
+    
+    readNowButton.disabled = true;
+    spinner.classList.add('visible');
+    
+    try {
+        // Make direct POST request to trigger sensor reading
+        const response = await fetch('/api/read-now', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        });
+        
+        console.log('Read-now response:', response.status);
+        
+        // Give the ESP32 a second to process the sensor readings
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Directly fetch the data instead of using existing function
+        const dataResponse = await fetch('/api/sensor-data');
+        const data = await dataResponse.json();
+        
+        // Process the data (reusing your existing update code)
+        // Update temperature with validation
+        if (data.temperature !== undefined && data.temperature !== null) {
+            document.getElementById('temperature').textContent = data.temperature.toFixed(1) + '°C';
+        }
+        
+        // Update other fields similarly
+        if (data.humidity !== undefined && data.humidity !== null) {
+            document.getElementById('humidity').textContent = data.humidity.toFixed(1) + '%';
+        }
+        
+        if (data.pressure !== undefined && data.pressure !== null) {
+            document.getElementById('pressure').textContent = data.pressure.toFixed(1) + ' hPa';
+        }
+        
+        if (data.heat_index !== undefined && data.heat_index !== null) {
+            document.getElementById('heat-index').textContent = data.heat_index.toFixed(1) + '°C';
+        }
+        
+        if (data.soil_moisture !== undefined && data.soil_moisture !== null) {
+            document.getElementById('soil-percentage').textContent = data.soil_moisture.toFixed(1) + '%';
+        }
+        
+        if (data.soil_raw !== undefined && data.soil_raw !== null) {
+            document.getElementById('soil-raw').textContent = data.soil_raw;
+        }
+        
+        if (data.time_str) {
+            document.getElementById('datetime').textContent = data.time_str;
+        }
+        
+        console.log("Sensor data updated successfully");
+        
+    } catch (error) {
+        console.error('Error in forceSensorReadNowDirect:', error);
+    } finally {
+        // ALWAYS hide spinner and re-enable button
+        spinner.classList.remove('visible');
+        readNowButton.disabled = false;
+    }
+}
+</script>
+</body>
+</html>
