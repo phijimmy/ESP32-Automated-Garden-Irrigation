@@ -46,7 +46,7 @@ An automated garden monitoring and irrigation system built with ESP32. This proj
 ## Initial Setup
 
 1. Power on the ESP32
-2. Connect to the "Garden Monitor" WiFi network (password: gardening123)
+2. Connect to the "GartenIrrigationSystem" WiFi network (password: gardening123)
 3. Open a browser and navigate to `http://192.168.4.1`
 4. Complete the setup form with your desired configuration
 5. The device will restart and begin monitoring
