@@ -27,7 +27,7 @@
 ### Soil Moisture Sensor
 
 - ESP32 GPIO36 (or configured analog pin) → Soil Moisture Sensor Output
-- ESP32 GPIO32 (or configured digital pin) → Soil Moisture Sensor Power Control (optional)
+- ESP32 GPIO27 (or configured digital pin) → Soil Moisture Sensor Power Control (optional)
 
 ### Relay Module
 
