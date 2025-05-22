@@ -1,0 +1,25 @@
+# PlatformIO specific
+.pio
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+.vscode
+
+# Build directory
+build/
+
+# Generated files
+*.pyc
+*.bak
+*.gch
+*.pch
+*.map
+
+# Platform-dependent files
+.DS_Store
+Thumbs.db
+
+# Custom secrets file (if you create one)
+secrets.h
+secrets.ini
